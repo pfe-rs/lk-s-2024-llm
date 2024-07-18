@@ -61,3 +61,13 @@ class LanguageModel:
             str: The extracted keyphrases.
         """
         return self.prompt(prompts.make_multi_extraction(text), temp=0, new_tokens=500)
+
+    def get_searchphrases(self, text: str) -> str:
+        """
+        Extract searchphrases from the given text.
+        Args:
+            text (str): The input text.
+        Returns:
+            str: The extracted seachphrases.
+        """
+        return self.prompt(prompts.make_search_prompt(text), temp=0, new_tokens=500)
