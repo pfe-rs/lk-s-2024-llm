@@ -1,32 +1,45 @@
-# Class to parse model outputs
+# output_parser.py
 
 import json
 import re
 
-class Output_parser():
+class OutputParser:
     @staticmethod
-    def find_json(text):
+    def find_json(text: str) -> str:
+        """
+        Find the JSON block within the provided text.
+        Args:
+            text (str): The input text containing JSON.
+        Returns:
+            str: The JSON block as a string.
+        """
         pattern = r"""```json(.*?)```"""
-        matches=re.findall(pattern,text,re.DOTALL)
-        assert len(matches) > 0 
+        matches = re.findall(pattern, text, re.DOTALL)
+        if not matches:
+            raise ValueError("No JSON block found in the provided text.")
         return matches[0]
+
     @staticmethod
-    def json_to_list(json_code):
-        parsed_json=json.loads(json_code)
-        if 'key_phrases' in parsed_json:
-            return parsed_json["key_phrases"]
-        elif 'keyphrases' in parsed_json:
-            return parsed_json["keyphrases"]
-        elif 'key_phrase' in parsed_json:
-            return parsed_json["key_phrase"]
-        elif 'keyphrase' in parsed_json:
-            return parsed_json["keyphrase"]
-        elif isinstance(parsed_json, list):
+    def json_to_list(json_code: str) -> list:
+        """
+        Convert a JSON string to a Python list.
+        Args:
+            json_code (str): The JSON string.
+        Returns:
+            list: The corresponding Python list.
+        """
+        parsed_json = json.loads(json_code)
+        if isinstance(parsed_json, list):
             return parsed_json
-        else:
-            print("Bad json output")
-            print(parsed_json)
-            raise Exception("json is not correctly written")
+        return parsed_json[next(iter(parsed_json))]
+
     @staticmethod
-    def output_to_list(output):
-        return Output_parser.json_to_list(Output_parser.find_json(output))
+    def output_to_list(output: str) -> list:
+        """
+        Convert model output to a list of key phrases.
+        Args:
+            output (str): The model output containing JSON.
+        Returns:
+            list: The list of key phrases.
+        """
+        return OutputParser.json_to_list(OutputParser.find_json(output))
