@@ -2,37 +2,12 @@
 
 import numpy as np
 
-from constants import EMBEDDING_MODEL_NAME
+from embedding import Embedder
 from typing import List
-from sentence_transformers import SentenceTransformer
 
-
-embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
 
 class STSEvaluation:
     treshhold = 0.75
-
-    @staticmethod
-    def get_embedding(phrase: str) -> np.ndarray:
-        """
-        Get the embedding for a single phrase.
-        Args:
-            phrase (str): The phrase to embed.
-        Returns:
-            np.ndarray: The embedding vector.
-        """
-        return embedding_model.encode([phrase])[0]
-
-    @staticmethod
-    def get_embeddings(phrases: List[str]) -> List[np.ndarray]:
-        """
-        Get embeddings for a list of phrases.
-        Args:
-            phrases (List[str]): The phrases to embed.
-        Returns:
-            List[np.ndarray]: The list of embedding vectors.
-        """
-        return embedding_model.encode(phrases)
 
     @staticmethod
     def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
@@ -135,8 +110,8 @@ class STSEvaluation:
         Returns:
             dict: The evaluation metrics.
         """
-        emb_predictions = STSEvaluation.get_embeddings(predictions)
-        emb_labels = STSEvaluation.get_embeddings(labels)
+        emb_predictions = Embedder.get_embedding(predictions)
+        emb_labels = Embedder.get_embedding(labels)
 
         similarity_matrix = STSEvaluation.make_similarity_matrix(emb_predictions, emb_labels)
 
