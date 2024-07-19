@@ -1,17 +1,21 @@
 # model_inference.py
 
 import output_parser
-
 from llm_class import LanguageModel
 
 class ModelInferencing:
+    _shared_state = {}
+
     def __init__(self, model: LanguageModel):
         """
         Initialize the ModelInferencing class.
         Args:
             model (LanguageModel): The language model instance.
         """
-        self.model = model
+        self.__dict__ = self._shared_state
+        if not hasattr(self, 'initialized'):
+            self.model = model
+            self.initialized = True
 
     def get_multiple_phrases(self, text: str) -> list:
         """
@@ -26,7 +30,7 @@ class ModelInferencing:
     
     def get_search_phrases(self, search_text: str) -> list:
         """
-        Get search key phrases from the seached text.
+        Get search key phrases from the searched text.
         Args:
             search_text (str): The input text.
         Returns:
