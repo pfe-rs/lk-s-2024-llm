@@ -41,7 +41,7 @@ from typing import List
 class Embedder:
     embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME)
 
-    @staticmethod
+    @staticmethod  
     def get_embedding(phrase: str) -> np.ndarray:
         """
         Get the embedding for a single phrase.
