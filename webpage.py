@@ -44,6 +44,49 @@ class Webpage:
         if url.endswith('/'):
             url = url[:-1]
         return url
+    @staticmethod
+    def get_clean_content(html: str) -> str:
+        # Parses the html in a way to make it easier for model to understand what is on the page
+
+
+        # Parse HTML with BeautifulSoup
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # Define a list of tag names that often contain the main content
+        content_tags = ['article', 'main', 'section', 'div']
+
+        # Extract elements with these tags
+        content = []
+        for tag in content_tags:
+            for element in soup.find_all(tag):
+                # You may add conditions to filter elements by class, id, etc.
+                if element.get('class') and 'content' in element.get('class'):
+                    content.append(element)
+                elif element.get('id') and 'content' in element.get('id'):
+                    content.append(element)
+                else:
+                    # Add other conditions as necessary
+                    if tag == 'div' and ('post' in element.get('class', []) or 'entry' in element.get('class', [])):
+                        content.append(element)
+
+        # Join the extracted elements' HTML
+        main_content_html = ''.join(str(element) for element in content)
+
+        # Optional: Clean with BeautifulSoup again
+        clean_soup = BeautifulSoup(main_content_html, 'html.parser')
+
+        # Remove unwanted tags or elements
+        for unwanted in clean_soup(['script', 'style', 'nav', 'footer', 'header', 'noscript']):
+            unwanted.decompose()
+
+        # Extract text
+        clean_text = clean_soup.get_text(separator='\n')
+
+        # Remove whitespaces
+        clean_text = re.sub(r'\n+', '\n', clean_text)
+        clean_text = re.sub(r' +', ' ', clean_text)
+        return clean_text.strip()
+
 
     def __init__(self, link: str):
         self.link = link
@@ -57,11 +100,7 @@ class Webpage:
         # Returns text from webpage
         if self.html == None:
             self.html = Webpage.fetch_html(self.link)
-        soup = BeautifulSoup(self.html, "html.parser")
-        text = soup.get_text()
-        text = re.sub(r'\n+', '\n', text)
-        text = re.sub(r' +', ' ', text)
-        return text.strip()
+        return Webpage.get_clean_content(self.html)
 
     def get_connects(self) -> List[str]:
         html = Webpage.fetch_html(self.link)

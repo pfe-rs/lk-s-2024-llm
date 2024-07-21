@@ -18,24 +18,25 @@ class PageSearch:
             emb_key - Embeddings of key phrases of the page
             emb_query - Embeddings of search phrases 
         '''
-        result = np.sum([[STSEvaluation.cosine_similarity(key, query) for key in emb_key] for query in emb_query])
-        return result
+        result = 0
+        return STSEvaluation.average_cosine_score(STSEvaluation.make_similarity_matrix(emb_key,emb_query))
     
-    @staticmethod
     def search_embedded_pages(self, search_phrases: List[np.ndarray]) -> List[Union[webpage.Webpage, float]]:
         page_list=[]
         for page in self.pages:
-            page_data = {
-                'page': page, 
-                'relevance': PageSearch.get_relevance(page.embeddings, search_phrases)
-            }
-            page_list.append(page_data)
-        
-        sorted_list = sorted(sorted_list, key=lambda x: x['relevance'])
+         #   print(page.link, np.shape(page.embeddings))
+            try: # Error in checking page, probably failed embed due to foreign language
+                page_data = {
+                    'page': page, 
+                    'relevance': PageSearch.get_relevance(page.embeddings, search_phrases)
+                }
+                page_list.append(page_data)
+            except:
+                continue
+        sorted_list = sorted(page_list, key=lambda x: x['relevance'])
 
         return sorted_list
     
-    @staticmethod 
     def search_pages(self, search_text: str, model: model_inference.ModelInferencing):
         search_phrases = model.get_search_phrases(search_text)
         emb_search = Embedder.get_embedding(search_phrases)

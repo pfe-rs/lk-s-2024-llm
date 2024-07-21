@@ -14,27 +14,31 @@ multiple_keyphrases_response = """```json
   ]
 }```"""
 
-multiple_keyphrases_prompt = """You are an AI assistant tasked with extracting key phrases from a webpage. The key phrases will be used to search for webpages with some specific key phrase. Webpage text is delimited by '<' for start and '>' for end.
+multiple_keyphrases_prompt = """You are an AI assistant tasked with extracting key phrases from a webpage. The said key phrases should represent what person who is interested in this text might be looking for. Webpage text is delimited with square brackets. 
 
-To successfully complete the task, do the following in order. Do not move onto the next instruction without completing the previous one. Give the keywords in JSON only after completing all the other instructions:
 
-1) Read the text carefully.
-2) Provide a short summary of the text.
-3) Make sure that summary summarizes the entire text and no part is left out.
-4) If some part is left out, write what is left out. After that, rewrite the summary.
-5) Read the phrase guidelines carefully.
-6) Utilizing the summary you wrote, find key phrases in the text.
+To successfully complete the task, do the following in order. Do not move onto the next instruction without completing the previous one. Give the keywords in json only after completing all the other instructions:
+
+1) Read your task and the webpage text carefully.
+2) Summarize the text.
+3) Think about what is contained in the text and what questions it answers.
+4) Focus on the questions that are being answered in most of the text.
+5) Based on those questions, come up with candidates for key phrases that text gives information about. 
+6) Ensure the key phrases follow the guidelines provided below.
+7) Select the final key phrases.
+8) Output the key phrases in JSON format.
 
 The guidelines phrases should follow are:
+
 1) Provide the phrases in JSON format, with each key phrase being an item in a list. The list name is "key_phrases".
 2) Use at most 10 key phrases. You can use less than that.
 3) Key phrases should be quite short, about 1-3 words.
 4) Ensure the key phrases are distinct from each other, avoiding synonyms or phrases with the same meaning.
-5) Select key phrases that are mentioned multiple times on the webpage, directly or through context. Avoid phrases that appear only once.
-6) By reading phrases the reader should have a good idea of what the text is about, without reading a single word of it.
-7) Start the JSON block with ```json and end it with ```.
+5) The phrases are based on information that the text provides.
+6) Prioritize the phrases that are present in the majority of the text over those that are present just in one part.
+7) Start the json block with ```json and end it with ```.
 
-The text from the webpage: <&>"""
+The text from the webpage: [&]"""
 
 def make_multi_extraction(text_to_extract_from: str) -> list:
     """
@@ -44,6 +48,9 @@ def make_multi_extraction(text_to_extract_from: str) -> list:
     Returns:
         list: The prompt to be used for extraction.
     """
+    
+  #  print(f"MKP Prompt{multiple_keyphrases_prompt}")
+    
     parts = multiple_keyphrases_prompt.split('&')
     if len(parts) == 1:
         new_prompt = [{"role": "user", "content": "".join([parts[0], text_to_extract_from])}]
@@ -129,4 +136,4 @@ def make_search_prompt(searched_text: str) -> list:
         new_prompt += parts[-1]
         new_prompt += searched_text
         
-    return [{"role": "user", "content": new_prompt}]
+    return [{"role": "user", "content": new_prompt}]# prompts.py
