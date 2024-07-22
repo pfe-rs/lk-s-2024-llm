@@ -2,6 +2,8 @@
 
 import json
 
+from typing import List
+
 multiple_keyphrases_text = """Bed Bath & Beyond Gains Bed Bath & Beyond, the largest United States home furnishings retailer, posted higher second-quarter profit, helped by sales of back-to-college merchandise. Net income climbed 2.9 percent, to $145.5 million, or 51 cents a share, matching analyst estimates. Revenue in the three months that ended Aug. 26 increased 12 percent, to $1.61 billion, the company, based in Union, N.J., said yesterday. Sales at stores open at least a year gained 4.8 percent, up from 4.5 percent a year earlier and beating analysts’ estimates. The company also said that an independent board committee had begun a voluntary review of stock option grants and that it would report further on the review in its quarterly filing with the Securities and Exchange Commission by Oct. 5. More than 130 companies have disclosed internal or federal investigations into possible irregularities in the way they paid executives with options."""
 
 multiple_keyphrases_response = """```json
@@ -38,7 +40,7 @@ The guidelines phrases should follow are:
 6) Prioritize the phrases that are present in the majority of the text over those that are present just in one part.
 7) Start the json block with ```json and end it with ```.
 
-The text from the webpage: [&]"""
+The text from the webpage: <&>"""
 
 def make_multi_extraction(text_to_extract_from: str) -> list:
     """
@@ -48,9 +50,6 @@ def make_multi_extraction(text_to_extract_from: str) -> list:
     Returns:
         list: The prompt to be used for extraction.
     """
-    
-  #  print(f"MKP Prompt{multiple_keyphrases_prompt}")
-    
     parts = multiple_keyphrases_prompt.split('&')
     if len(parts) == 1:
         new_prompt = [{"role": "user", "content": "".join([parts[0], text_to_extract_from])}]
@@ -136,4 +135,27 @@ def make_search_prompt(searched_text: str) -> list:
         new_prompt += parts[-1]
         new_prompt += searched_text
         
-    return [{"role": "user", "content": new_prompt}]# prompts.py
+    return [{"role": "user", "content": new_prompt}]
+
+
+key_question_prompt = """You are an AI model specialized in extracting questions from text. You will be provided with a text and you need to come up with key questions that the text answers. I am making a program that will give relevant texts based on user's questions. User's questions will be compared against your own to find similarity, and if they are similar, that means the provided text is relevant to their question. So make sure to prioritize questions that are relevant to the majority of the text. Here is what I want you to do, follow those instructions in order:
+
+1) The text is delimited by square brackets and is at the end of the prompt. Read the text carefully.
+2) Come up with the summary of every few consecutive sentences.
+3) Think about what the reader learns from reading those sentences.
+4) Now think about larger blocks of sentences, made up of the smaller blocks you previously observed.
+5) They give more insight as a larger block, what is the main information given in those bigger blocks? What questions are being answered? They should be concise and on point.
+6) Now look at the questions, which of them are frequently discussed. Which ones are just briefly mentioned, without the text being about them?
+7) Make sure your assessment is correct and that you ordered questions by their frequency and their relevance to the text.
+8) We do not want to have too many questions. If you made more than 10 questions, keep only the 10 most relevant ones.
+9) Write the list of your questions in JSON format.
+
+The text: [&]
+"""
+def questions_from_webpage(page_text: str) -> List[str]:
+    parts = multiple_keyphrases_prompt.split('&')
+
+query_question_prompt = """
+
+"""
+

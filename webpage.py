@@ -44,6 +44,7 @@ class Webpage:
         if url.endswith('/'):
             url = url[:-1]
         return url
+    
     @staticmethod
     def get_clean_content(html: str) -> str:
         # Parses the html in a way to make it easier for model to understand what is on the page
