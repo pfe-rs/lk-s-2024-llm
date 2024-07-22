@@ -41,6 +41,8 @@ class LanguageModel:
         Returns:
             str: The generated text.
         """
+        
+        
         generation_args = {
             "max_new_tokens": new_tokens,
             "return_full_text": False,
@@ -60,4 +62,15 @@ class LanguageModel:
         Returns:
             str: The extracted keyphrases.
         """
+        #print(f"TEST PROMPT {prompts.make_multi_extraction('aaa')}")
         return self.prompt(prompts.make_multi_extraction(text), temp=0, new_tokens=500)
+
+    def get_searchphrases(self, text: str) -> str:
+        """
+        Extract searchphrases from the given text.
+        Args:
+            text (str): The input text.
+        Returns:
+            str: The extracted seachphrases.
+        """
+        return self.prompt(prompts.make_search_prompt(text), temp=0, new_tokens=500)
