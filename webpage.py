@@ -4,6 +4,8 @@ import requests
 import numpy as np
 
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from typing import List
 from urllib.parse import urlparse, urljoin, urldefrag
 
@@ -12,11 +14,18 @@ class Webpage:
 
     @staticmethod
     def fetch_html(url: str) -> str:
-        # Gives html code of url
-        #print(url)
-        response = requests.get(url)
-        response.raise_for_status()
-        return response.text
+        # Set up headless Chrome options
+        options = Options()
+        options.headless = True
+        driver = webdriver.Chrome(options=options)
+        
+        # Load the page
+        driver.get(url)
+        
+        # Get the HTML
+        html = driver.page_source
+        driver.quit()
+        return html
 
     @staticmethod
     def compare_domain(url, base_domain) -> bool:
@@ -58,17 +67,28 @@ class Webpage:
 
         # Extract elements with these tags
         content = []
-        for tag in content_tags:
-            for element in soup.find_all(tag):
-                # You may add conditions to filter elements by class, id, etc.
-                if element.get('class') and 'content' in element.get('class'):
-                    content.append(element)
-                elif element.get('id') and 'content' in element.get('id'):
-                    content.append(element)
-                else:
-                    # Add other conditions as necessary
-                    if tag == 'div' and ('post' in element.get('class', []) or 'entry' in element.get('class', [])):
-                        content.append(element)
+      #  for tag in content_tags:
+        for element in soup.find_all():
+            # You may add conditions to filter elements by class, id, etc.
+            # print(element.get('class'))
+            
+            good = False
+            
+            if element.get('class'):
+                classes=element.get('class')
+                for cl in classes:
+                #    print(cl)
+                    if "text" in cl or "content" in cl or "container" in cl:
+                        good=True
+            
+            if element.get('class') and 'text' in element.get('class'):
+                good = True
+                
+            if element.tag == 'div' and ('post' in element.get('class', []) or 'entry' in element.get('class', [])):
+                good = True
+            
+            if good:
+                content.append(element)
 
         # Join the extracted elements' HTML
         main_content_html = ''.join(str(element) for element in content)
@@ -92,13 +112,20 @@ class Webpage:
     def __init__(self, link: str):
         self.link = link
         self.html = None
+        self.force_text = None
         self.embeddings = None
 
     def set_embedding(self, embedding: List[np.ndarray]) -> None:
         self.embeddings=embedding
     
+    def set_force_text(self, text):
+        self.force_text = text
+
     def get_text(self) -> str:
         # Returns text from webpage
+        if self.force_text != None:
+            return self.force_text
+
         if self.html == None:
             self.html = Webpage.fetch_html(self.link)
         return Webpage.get_clean_content(self.html)
